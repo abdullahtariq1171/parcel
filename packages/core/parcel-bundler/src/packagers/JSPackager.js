@@ -26,6 +26,11 @@ class JSPackager extends Packager {
           this.options.hmrHostname
         )};` + preludeCode;
     }
+
+    if (this.bundle.entryAsset.options.shebang) {
+      preludeCode = `${this.bundle.entryAsset.options.shebang}${preludeCode}`;
+    }
+
     await this.write(preludeCode + '({');
     this.lineOffset = lineCounter(preludeCode);
   }

@@ -25,6 +25,8 @@ const SW_RE = /\bnavigator\s*\.\s*serviceWorker\s*\.\s*register\s*\(/;
 const WORKER_RE = /\bnew\s*(?:Shared)?Worker\s*\(/;
 const SOURCEMAP_RE = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*([^\s]+)/;
 const DATA_URL_RE = /^data:[^;]+(?:;charset=[^;]+)?;base64,(.*)/;
+const SHEBANG_TEST_RE = /^#!/;
+const SHEBANG_EXTRACT_RE = /^#![^\n\r]*[\r\n]/;
 
 class JSAsset extends Asset {
   constructor(name, options) {
@@ -151,6 +153,12 @@ class JSAsset extends Asset {
   async pretransform() {
     if (this.options.sourceMaps) {
       await this.loadSourceMap();
+    }
+
+    if (this.options.target === 'node' && SHEBANG_TEST_RE.test(this.contents)) {
+      this.options.shebang = SHEBANG_EXTRACT_RE.exec(this.contents)[0];
+
+      this.contents = this.contents.replace(SHEBANG_EXTRACT_RE, '');
     }
 
     await babel(this);
